@@ -1,11 +1,17 @@
 from fastapi import FastAPI, HTTPException
+from fastapi.responses import RedirectResponse
 import pandas as pd
 import numpy as np
 import joblib
 from datetime import datetime, timedelta
 
 # ── 1. Initialize API & Load Artifacts ────────────────────────────────
-app = FastAPI(title="Indian Railways Dynamic ETA API", version="2.0")
+app = FastAPI(title="Indian Railways Dynamic ETA API", version="2.5")
+
+@app.get("/", include_in_schema=False)
+def read_root():
+    # Instantly redirect anyone who visits the main URL to the Swagger UI
+    return RedirectResponse(url="/docs")
 
 print("⏳ Loading ML Models and Artifacts...")
 le_map = joblib.load('label_encoders.pkl')
