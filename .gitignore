@@ -1,0 +1,25 @@
+# Environments
+.venv/
+venv/
+env/
+
+# Python Cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Mac System Files
+.DS_Store
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# IDEs
+.vscode/
+
+# Large datasets
+ir_train.csv
+ir_test.csv
+
+# CatBoost training artifacts
+catboost_info/
