@@ -1,14 +1,16 @@
-# 🚂 Indian Railways Dynamic ETA API (v1.5)
-**Smart India Hackathon (SIH) Prototype - Operational Update**
+# 🚂 Indian Railways Dynamic ETA API (v2.5)
+**Smart India Hackathon (SIH) Prototype - Cloud Deployed**
 
 This API utilizes an Optuna-optimized Stacked Meta-Model (LightGBM + XGBoost + CatBoost) to process static scheduling data, weather, and **real-time operational metrics** (live GPS speed, current delay carryover, downstream congestion, and unscheduled stops) to predict dynamic ETAs.
 
 ---
 
-## 📍 Base URL
+## 📍 Base URLs
+*   **Production Cloud (Render):** `https://dynamic-train-eta-api.onrender.com/docs#/default/predict_eta_predict_eta_post`
 *   **Local Development:** `http://127.0.0.1:8000`
-*   **Public/Ngrok URL:** `https://acquire-wired-alike.ngrok-free.dev` 
-*   **Swagger UI (Interactive Docs):** `/docs`
+*   **Swagger UI (Interactive Docs):** `/docs` (Note: Visiting the root URL `/` will automatically redirect you to `/docs` [1]).
+
+> **⚠️ Note on Cloud Cold Starts:** This API is hosted on Render's free tier. If the API is inactive for 15+ minutes, the server will "sleep". The first request to wake it up may take 30-50 seconds. All subsequent requests will process in milliseconds.
 
 ---
 
@@ -76,10 +78,11 @@ The API returns the calculated delay, the final dynamic ETA (formatted cleanly),
 }
 
 💻 Developer Code Snippets
-For Frontend (JavaScript / React)
+For Frontend (JavaScript / React / Next.js)
 
 const getDynamicETA = async (trainData) => {
-  const response = await fetch("YOUR_NGROK_URL/predict_eta", {
+  // Use your live Render URL here
+  const response = await fetch("[https://indian-railways-api.onrender.com/predict_eta](https://indian-railways-api.onrender.com/predict_eta)", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(trainData)
@@ -91,15 +94,44 @@ const getDynamicETA = async (trainData) => {
   return result;
 };
 
-For Backend / Microservices (Python)
-import requests
+For Backend / Testing (cURL)
 
-url = "YOUR_NGROK_URL/predict_eta"
-payload = {
-    # ... insert data dictionary from above table
-}
-
-response = requests.post(url, json=payload)
-data = response.json()
-print(f"Train {data['train_number']} ETA: {data['dynamic_eta']}")
+curl -X 'POST' \
+  '[https://indian-railways-api.onrender.com/predict_eta](https://indian-railways-api.onrender.com/predict_eta)' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "train_number": 12004,
+  "departure_hour": 14,
+  "month": 12,
+  "is_night_departure": 0,
+  "is_peak_hour": 1,
+  "is_monsoon_season": 0,
+  "is_fog_risk": 1,
+  "fog_risk_score": 0.85,
+  "season_severity_score": 0.6,
+  "track_doubled": 1,
+  "is_electrified": 1,
+  "is_hdn_route": 1,
+  "distance_km": 145.5,
+  "distance_completed_km": 85.5,
+  "num_scheduled_stops": 3,
+  "scheduled_travel_hours": 2.5,
+  "psr_count": 4,
+  "loco_age_years": 12,
+  "coach_age_years": 8,
+  "maintenance_score": 7,
+  "seat_utilisation_pct": 110,
+  "zone_congestion_index": 0.9,
+  "route_historical_ontime_pct": 65,
+  "late_incoming_rake": 1,
+  "source_station_category": "A1",
+  "destination_station_category": "B",
+  "live_speed_kmh": 42.5,
+  "current_delay_minutes": 25.0,
+  "trains_ahead": 2,
+  "unscheduled_stop_count": 1,
+  "primary_delay_cause": "Normal Running",
+  "scheduled_arrival_time": "2026-10-15 16:30:00"
+}'
 
