@@ -6,7 +6,7 @@ import joblib
 from datetime import datetime, timedelta
 
 # ── 1. Initialize API & Load Artifacts ────────────────────────────────
-app = FastAPI(title="Indian Railways Dynamic ETA API", version="2.5")
+app = FastAPI(title="Indian Railways Dynamic ETA API", version="3.0")
 
 @app.get("/", include_in_schema=False)
 def read_root():
@@ -15,11 +15,11 @@ def read_root():
 
 print("⏳ Loading ML Models and Artifacts...")
 le_map = joblib.load('label_encoders.pkl')
-model_lgb = joblib.load('lgb_base.pkl')
-model_xgb = joblib.load('xgb_base.pkl')
-model_cat = joblib.load('cat_base.pkl')
-weights = joblib.load('optuna_weights.pkl')
-FEATURES = joblib.load('features_list.pkl')
+model_lgb = joblib.load('lgb_base_v3.pkl')
+model_xgb = joblib.load('xgb_base_v3.pkl')
+model_cat = joblib.load('cat_base_v3.pkl')
+weights = joblib.load('optuna_weights_v3.pkl')
+FEATURES = joblib.load('features_list_v3.pkl')
 print("✅ All artifacts loaded successfully!")
 
 # ── 2. Feature Engineering Logic ──────────────────────────────────────
@@ -36,8 +36,9 @@ def predict_eta(payload: dict):
         # --- Fallbacks for live features ---
         if 'primary_delay_cause' not in payload:
             payload['primary_delay_cause'] = 'Normal Running'
-        if 'live_speed_kmh' not in payload:
-            payload['live_speed_kmh'] = 0.0 
+        # Let feature_engineering.py create the correct fallback
+        # (scheduled speed proxy) when live speed is not supplied.
+
         if 'season_severity_score' not in payload:
             payload['season_severity_score'] = 0.5 
         if 'fog_risk_score' not in payload:
